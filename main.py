@@ -9,8 +9,9 @@ def index():
     return jsonify({'message': 'Hello, world'})
 
 
-@app.route("/omikuji/")
+@app.route("/omikuji/", methods=["POST"])
 def omikuji():
+    # TODO おみくじリスト取得
     message = "hello world"
     response_json = {
         "response_type": "in_channel",
@@ -18,16 +19,23 @@ def omikuji():
     }
     return jsonify(response_json)
 
-@app.route("/calc/inc_tax_price/", methods=["GET", "POST"])
+@app.route("/calc/inc_tax_price/", methods=["POST"])
 def calc_include_tax_price():
     print(request.form)
     calc_price = CalcPrice()
-    base_price = request.form["text"]
-    tax_rate = 8
-    include_tax_price = calc_price.include_tax_price(int(base_price), int(tax_rate))
+    # textを分解
+    base_price, tax_rate = request.form["text"].strip().split()
+
+    # 税込価格を計算
+    try:
+        include_tax_price = calc_price.include_tax_price(int(base_price), int(tax_rate))
+        text = str(base_price) + "円の税込価格は`" + str(include_tax_price) + "`円です。"
+    except ValueError:
+        text = "本体価格、税率は数値で指定してください。"
+
     response_json = {
         "response_type": "in_channel",
-        "text": include_tax_price
+        "text": text
     }
     return jsonify(response_json)
 #
