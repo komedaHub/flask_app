@@ -23,16 +23,39 @@ def omikuji():
 def calc_include_tax_price():
     print(request.form)
     calc_price = CalcPrice()
+
     # textを分解
     base_price, tax_rate = request.form["text"].strip().split()
 
     # 税込価格を計算
     try:
         include_tax_price = calc_price.include_tax_price(int(base_price), int(tax_rate))
-        text = str(base_price) + "円の税込価格は`" + str(include_tax_price) + "`円です。"
+        text = str(base_price) + "円の税込価格は「" + str(include_tax_price) + "」円です。"
     except ValueError:
-        text = "本体価格、税率は数値で指定してください。"
+        text = "税抜価格、税率は数値で指定してください。"
 
+    response_json = {
+        "response_type": "in_channel",
+        "text": text
+    }
+    return jsonify(response_json)
+
+@app.route("/calc/exc_tax_price/", methods=["POST"])
+def calc_exclude_tax_price():
+    print(request.form)
+    calc_price = CalcPrice()
+
+    # textを分解
+    sales_price, tax_rate = request.form["text"].strip().split()
+
+    # 税込価格を計算
+    try:
+        exclude_tax_price = calc_price.exclude_tax_price(int(sales_price), int(tax_rate))
+        text = str(sales_price) + "円の税抜価格は「" + str(exclude_tax_price) + "」円です。※端数分、誤差が生じます。"
+    except ValueError:
+        text = "税込価格、税率は数値で指定してください。"
+
+    # 送信メッセージを作る。
     response_json = {
         "response_type": "in_channel",
         "text": text
